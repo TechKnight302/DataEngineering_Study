@@ -1,31 +1,34 @@
+--- STEP 1 — Run in master Database Connection
+    
+/*
+=============================================================
+Create DataWarehouse Database (Azure SQL Safe)
+=============================================================
+*/
 
-USE master;
-
-GO
-
--- Drop and recreate the 'DataWarehouse' database
-
-IF EXISTS ( SELECT 1 FROM sys.databases WHERE name = 'DataWarehouse' )
+IF DB_ID('DataWarehouse') IS NULL
 BEGIN
-    ALTER DATABASE Datawarehouse SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE DataWarehouse;
-END;
-GO
+    CREATE DATABASE DataWarehouse;
+END
+    
+-- STEP 2 — Open NEW Connection to DataWarehouse
 
---Create the 'DataWarehouse' database
+Database: DataWarehouse
+/*
+=============================================================
+Create Medallion Architecture Schemas
+=============================================================
+*/
 
-CREATE DATABASE DataWarehouse;
-GO
+-- Bronze Schema (Raw Data)
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'bronze')
+    EXEC('CREATE SCHEMA bronze');
 
-USE DataWarehouse;
-GO
+-- Silver Schema (Cleaned Data)
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'silver')
+    EXEC('CREATE SCHEMA silver');
 
--- Create Schemas
-CREATE SCHEMA bronze;
-GO
-
-CREATE SCHEMA silver;
-GO
-
-CREATE SCHEMA gold;
+-- Gold Schema (Business Layer)
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'gold')
+    EXEC('CREATE SCHEMA gold');
 
